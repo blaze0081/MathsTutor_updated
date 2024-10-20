@@ -6,11 +6,8 @@ import html
 import requests
 from stringsFormatter import should_skip_text, latex_to_symbols
 
-from dotenv import load_dotenv
-load_dotenv()
-
-api_key = os.getenv("OPENAI_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API")
+api_key = st.secrets["openai"]["api_key"]
+GOOGLE_API_KEY = st.secrets["google"]["credentials"]
 
 def process_latex_content(answer):
     # Split the text by LaTeX blocks (both \[...\] and \boxed{...})
