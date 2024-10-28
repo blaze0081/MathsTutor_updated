@@ -4,54 +4,60 @@ import os
 import re
 import html
 import requests
-from stringsFormatter import should_skip_text, latex_to_symbols
+import streamlit.components.v1 as components
 
 api_key = st.secrets["openai"]["api_key"]
 GOOGLE_API_KEY = st.secrets["google"]["credentials"]
 
-def process_latex_content(answer):
-    # Split the text by LaTeX blocks (both \[...\] and \boxed{...})
-    parts = re.split(r'(\\\[.*?\\\]|\\\boxed\{.*?\})', answer, flags=re.DOTALL)
-    
-    for part in parts:
-        if part.strip():
-            if part.startswith('\\[') and part.endswith('\\]'):
-                # Extract content between \[...\]
-                math_content = part[2:-2].strip()
-                st.latex(math_content)
-            elif part.startswith('\\boxed{'):
-                # Extract content between \boxed{...}
-                math_content = part[7:-1].strip()
-                st.latex(f"\\boxed{{{math_content}}}")
-            else:
-                # Split the text part into lines
-                lines = part.split('\n')
-                for line in lines:
-                    # Only write lines that don't match math patterns
-                    if line.strip() and not should_skip_text(line):
-                        st.write(line)
+# Add MathJax initialization to your Streamlit app
+def init_mathjax():
+    components.html(
+        """
+        <script>
+            window.MathJax = {
+                tex: {
+                    inlineMath: [['$', '$'], ['\\(', '\\)']],
+                    displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                },
+                svg: {
+                    fontCache: 'global'
+                }
+            };
+        </script>
+        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        """,
+        height=0,
+    )
 
-
-def process_math_expressions(text):
-    """
-    Extracts math expressions from text and replaces them with placeholders
-    Returns processed text and a dictionary of replacements
-    """
-    math_expressions = []
-    placeholders = {}
+def process_latex_content(content):
+    # Function to process and clean LaTeX content
+    processed_content = content
     
-    # Find all LaTeX expressions between \[ \] and \boxed{}
-    latex_pattern = r'(\\\[.*?\\\]|\\\boxed\{.*?\})'
+    # Replace common LaTeX patterns for better rendering
+    replacements = {
+        r'\(': '$',
+        r'\)': '$',
+        r'\[': '$$',
+        r'\]': '$$',
+    }
     
-    def replacement(match):
-        expr = match.group(1)
-        placeholder = f"__MATH_{len(math_expressions)}__"
-        math_expressions.append(expr)
-        placeholders[placeholder] = expr
-        return placeholder
+    for old, new in replacements.items():
+        processed_content = processed_content.replace(old, new)
     
-    processed_text = re.sub(latex_pattern, replacement, text, flags=re.DOTALL)
-    return processed_text, placeholders
+    # Split content into questions and answers sections
+    sections = re.split(r'(Questions:|Answers:)', processed_content)
+    formatted_content = []
+    
+    for section in sections:
+        if section.strip() in ['Questions:', 'Answers:']:
+            formatted_content.append(f"### {section.strip()}\n")
+        else:
+            # Process numbered items
+            section = re.sub(r'(\d+\.) ', r'\n\1 ', section)
+            formatted_content.append(section)
+    
+    return '\n'.join(formatted_content)
 
 def translate_text(text, target_language):
     try:
@@ -82,48 +88,65 @@ def translate_text(text, target_language):
         return text
 
 def solve():
-    if not st.session_state.question_queue:
-        return "No questions selected to solve. Please select questions from the main page."
+    # Initialize MathJax
+    init_mathjax()
+    
+
     
     client = OpenAI(api_key=api_key)
     
+    system_message = """You are an experienced mathematics teacher. Solve the questions given, following these guidelines:
+    1. Include step-by-step solutions where appropriate
+    2. Use LaTeX formatting for mathematical expressions (use $ for inline math and $$ for display math)
+    3. Number each question clearly
+    4. Separate questions and answers clearly"""
     questions = list(st.session_state.question_queue)
     language = st.session_state.language
     prompt = "Please solve the following mathematics questions step by step:\n\n"
     for i, question in enumerate(questions, 1):
         prompt += f"Question {i}: {question}\n"
 
-    system_message = "You are a math tutor."
+
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4-0613",
         messages=[
             {"role": "system", "content": system_message},
-            {"role": "system", "content": prompt}
-        ] 
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.7
     )
-        
-    answer = response.choices[0].message.content
-
-    # If translation is needed
+    
+    raw_answer = response.choices[0].message.content
+    
+    # Process the content for better rendering
+    processed_content = process_latex_content(raw_answer)
+    
+    # Handle translation if Hindi is selected
     if language == "Hindi":
-        # First extract and save all LaTeX expressions
-        processed_text, math_placeholders = process_math_expressions(answer)
+        # Extract and preserve LaTeX expressions
+        latex_expressions = re.findall(r'\$[^$]+\$|\$\$[^$]+\$\$', processed_content)
+        # Replace LaTeX with placeholders
+        for i, expr in enumerate(latex_expressions):
+            processed_content = processed_content.replace(expr, f'LATEX_{i}_')
         
-        # Convert remaining LaTeX commands to symbols in the text
-        processed_text = latex_to_symbols(processed_text)
+        # Translate the text
+        translated_text = translate_text(processed_content, "hi")
         
-        # Translate the processed text
-        translated_text = translate_text(processed_text, language)
+        # Restore LaTeX expressions
+        for i, expr in enumerate(latex_expressions):
+            translated_text = translated_text.replace(f'LATEX_{i}_', expr)
         
-        # Restore the original LaTeX expressions
-        for placeholder, math_expr in math_placeholders.items():
-            translated_text = translated_text.replace(placeholder, math_expr)
-        
-        answer = translated_text
+        processed_content = translated_text
     
-    # Process and display the content
-    process_latex_content(answer)
-    
-    st.session_state.question_queue.clear()
-    st.session_state.checked_questions.clear()
+    # Display the content using Streamlit's markdown
+    st.write("### Generated Questions and Solutions")
+    for line in processed_content.split('\n'):
+        if line.strip():
+            st.markdown(line, unsafe_allow_html=True)
+
+    if st.button("Clear Selected Questions"):
+        st.session_state.question_queue.clear()
+        st.session_state.checked_questions.clear()
+        st.success("Selected questions cleared!")
+        st.rerun()
 
