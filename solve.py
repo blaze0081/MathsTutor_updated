@@ -2,13 +2,10 @@ import streamlit as st
 from openai import OpenAI
 import os
 import re
-import html
-import requests
 import streamlit.components.v1 as components
+from dotenv import load_dotenv
 
 api_key = st.secrets["openai"]["api_key"]
-GOOGLE_API_KEY = st.secrets["google"]["credentials"]
-
 # Add MathJax initialization to your Streamlit app
 def init_mathjax():
     components.html(
@@ -59,33 +56,6 @@ def process_latex_content(content):
     
     return '\n'.join(formatted_content)
 
-def translate_text(text, target_language):
-    try:
-        if target_language.lower() == 'hindi':
-            target_language = 'hi'
-            
-        url = 'https://translation.googleapis.com/language/translate/v2'
-        params = {
-            'q': text,
-            'target': target_language,
-            'key': GOOGLE_API_KEY
-        }
-        
-        response = requests.post(url, params=params)
-        
-        if response.status_code == 200:
-            result = response.json()
-            translated_text = html.unescape(
-                result['data']['translations'][0]['translatedText']
-            )
-            return translated_text
-        else:
-            st.error(f"Translation API error: {response.text}")
-            return text
-            
-    except Exception as e:
-        st.error(f"Translation error: {str(e)}")
-        return text
 
 def solve():
     # Initialize MathJax
@@ -102,13 +72,13 @@ def solve():
     4. Separate questions and answers clearly"""
     questions = list(st.session_state.question_queue)
     language = st.session_state.language
-    prompt = "Please solve the following mathematics questions step by step:\n\n"
+    prompt = f"Please solve the following mathematics questions step by step:\n\n in {language}"
     for i, question in enumerate(questions, 1):
         prompt += f"Question {i}: {question}\n"
 
 
     response = client.chat.completions.create(
-        model="gpt-4-0613",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": prompt}
@@ -120,23 +90,7 @@ def solve():
     
     # Process the content for better rendering
     processed_content = process_latex_content(raw_answer)
-    
-    # Handle translation if Hindi is selected
-    if language == "Hindi":
-        # Extract and preserve LaTeX expressions
-        latex_expressions = re.findall(r'\$[^$]+\$|\$\$[^$]+\$\$', processed_content)
-        # Replace LaTeX with placeholders
-        for i, expr in enumerate(latex_expressions):
-            processed_content = processed_content.replace(expr, f'LATEX_{i}_')
         
-        # Translate the text
-        translated_text = translate_text(processed_content, "hi")
-        
-        # Restore LaTeX expressions
-        for i, expr in enumerate(latex_expressions):
-            translated_text = translated_text.replace(f'LATEX_{i}_', expr)
-        
-        processed_content = translated_text
     
     # Display the content using Streamlit's markdown
     st.write("### Generated Questions and Solutions")
@@ -149,4 +103,3 @@ def solve():
         st.session_state.checked_questions.clear()
         st.success("Selected questions cleared!")
         st.rerun()
-
