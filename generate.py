@@ -12,6 +12,8 @@ import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 api_key = st.secrets["openai"]["api_key"]
+# Initialize OpenAI client at the module level
+client = OpenAI(api_key=api_key)
 
 def format_math_content(content):
     """
@@ -105,9 +107,6 @@ def create_pdf(text):
     buffer.seek(0)
     return buffer
 
-
-
-# Add MathJax initialization to your Streamlit app
 def init_mathjax():
     components.html(
         """
@@ -191,13 +190,11 @@ def generate():
         language = st.selectbox(
             "Language",
             ("English", "Hindi"),
-            index= preset_index
+            index=preset_index
         )
 
     if st.button("Generate Questions"):
         with st.spinner("Generating questions..."):
-            client = OpenAI(api_key=api_key)
-            
             system_message = """You are an experienced mathematics teacher. Generate questions similar to the given examples, following these guidelines:
             1. Maintain consistent difficulty level
             2. Include step-by-step solutions where appropriate
@@ -223,47 +220,46 @@ Answers:
 2. [Answer to second question with steps]
 ..."""
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7
-        )
-        
-        raw_answer = response.choices[0].message.content
-        
-        # Process the content for better rendering
-        processed_content = format_math_content(raw_answer)
-        
-        
-        # Display the content using Streamlit's markdown
-        st.write("### Generated Questions and Solutions")
-        # Split content into sections and display with proper spacing
-        sections = processed_content.split('\n\n')
-        for section in sections:
-            if section.strip():
-                st.markdown(section, unsafe_allow_html=True)
-                st.markdown("&nbsp;")  # Add extra space between sections
-        
-        # Create download buttons with properly formatted content
-        st.download_button(
-            label="Download Questions and Solutions",
-            data=processed_content,
-            file_name="math_questions.txt",
-            mime="text/plain"
-        )
-        
-        # Create and offer PDF download
-        pdf = create_pdf(processed_content)
-        st.download_button(
-            label="Download PDF",
-            data=pdf,
-            file_name="questions_and_answers.pdf",
-            mime="application/pdf"
-        )
-        
-    except Exception as e:
-        st.error(f"An error occurred while generating questions: {str(e)}")
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4",  # Fixed the model name from "gpt-4o" to "gpt-4"
+                    messages=[
+                        {"role": "system", "content": system_message},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.7
+                )
+                
+                raw_answer = response.choices[0].message.content
+                
+                # Process the content for better rendering
+                processed_content = format_math_content(raw_answer)
+                
+                # Display the content using Streamlit's markdown
+                st.write("### Generated Questions and Solutions")
+                # Split content into sections and display with proper spacing
+                sections = processed_content.split('\n\n')
+                for section in sections:
+                    if section.strip():
+                        st.markdown(section, unsafe_allow_html=True)
+                        st.markdown("&nbsp;")  # Add extra space between sections
+                
+                # Create download buttons with properly formatted content
+                st.download_button(
+                    label="Download Questions and Solutions",
+                    data=processed_content,
+                    file_name="math_questions.txt",
+                    mime="text/plain"
+                )
+                
+                # Create and offer PDF download
+                pdf = create_pdf(processed_content)
+                st.download_button(
+                    label="Download PDF",
+                    data=pdf,
+                    file_name="questions_and_answers.pdf",
+                    mime="application/pdf"
+                )
+                
+            except Exception as e:
+                st.error(f"An error occurred while generating questions: {str(e)}")
