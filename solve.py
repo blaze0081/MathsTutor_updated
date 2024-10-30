@@ -5,7 +5,10 @@ import re
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-api_key = st.secrets["openai"]["api_key"]
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+
 # Add MathJax initialization to your Streamlit app
 def init_mathjax():
     components.html(
@@ -61,8 +64,6 @@ def solve():
     # Initialize MathJax
     init_mathjax()
     
-
-    
     client = OpenAI(api_key=api_key)
     
     system_message = """You are an experienced mathematics teacher. Solve the questions given, following these guidelines:
@@ -72,7 +73,7 @@ def solve():
     4. Separate questions and answers clearly"""
     questions = list(st.session_state.question_queue)
     language = st.session_state.language
-    prompt = f"Please solve the following mathematics questions step by step:\n\n in {language}"
+    prompt = f"Please solve the following mathematics questions in {language} step by step:\n\n "
     for i, question in enumerate(questions, 1):
         prompt += f"Question {i}: {question}\n"
 
@@ -87,6 +88,12 @@ def solve():
     )
     
     raw_answer = response.choices[0].message.content
+
+    # if language == "Hindi":
+    #     # Translate the processed text
+    #     translated_text = translate_text(raw_answer) 
+
+    #     raw_answer = translated_text
     
     # Process the content for better rendering
     processed_content = process_latex_content(raw_answer)

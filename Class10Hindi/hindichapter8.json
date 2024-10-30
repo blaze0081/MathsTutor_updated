@@ -1,0 +1,154 @@
+{
+  "chapter": "त्रिकोणमिति",
+  "exercises": [
+    {
+      "exercise": "8.1",
+      "questions": [
+        {
+          "question": "∆ABC में, जिसका कोण B समकोण है, AB = 24 cm और BC = 7 cm है। निम्नलिखित का मान ज्ञात कीजिए:",
+          "sub_questions": [
+            "sin A, cos A",
+            "sin C, cos C"
+          ]
+        },
+        {
+          "question": "आकृति 8.13 में, tan P - cot R का मान ज्ञात कीजिए।",
+          "image": "8.1.jpg"
+        },
+        {
+          "question": "यदि sin A = 3/4, तो cos A और tan A का मान परिकलित कीजिए।"
+        },
+        {
+          "question": "यदि 15 cot A = 8 हो तो sin A और sec A का मान ज्ञात कीजिए।"
+        },
+        {
+          "question": "यदि sec θ = 13/12 हो तो अन्य सभी त्रिकोणमितीय अनुपात परिकलित कीजिए।"
+        },
+        {
+          "question": "यदि ∠A और ∠B न्यून कोण हों, जहाँ cos A = cos B, तो दिखाइए कि ∠A = ∠B।"
+        },
+        {
+          "question": "यदि cot θ = 7/8, तो:",
+          "sub_questions": [
+            "(1 + sin θ)(1 - sin θ) का मान निकालिए।",
+            "cot² θ का मान निकालिए।"
+          ]
+        },
+        {
+          "question": "यदि 3 cot A = 4, तो जाँच कीजिए कि 1 - tan² A = cos² A - sin² A है या नहीं।"
+        },
+        {
+          "question": "त्रिभुज ABC में, जिसका कोण B समकोण है, यदि tan A = 1/√3 हो, तो निम्नलिखित का मान ज्ञात कीजिए:",
+          "sub_questions": [
+            "sin A cos C + cos A sin C",
+            "cos A cos C - sin A sin C"
+          ]
+        },
+        {
+          "question": "∆PQR में, जिसका कोण R समकोण है, PR + QR = 25 cm और PQ = 5 cm है। sin P, cos P और tan P के मान ज्ञात कीजिए।"
+        },
+        {
+          "question": "बताइए कि निम्नलिखित कथन सत्य है या असत्य। कारण सहित उत्तर की पुष्टि कीजिए:",
+          "sub_questions": [
+            "tan A का मान सदैव 1 से कम होता है।",
+            "यदि sec θ = 12/5 हो, तो sin θ का मान 5/12 होगा।",
+            "tan θ और cot θ के लिए परिणाम एक समान रूप से है।",
+            "cot A, cot A² का गुणनफल 1 होता है।",
+            "किसी भी कोण θ के लिए, sin θ = 4/3।"
+          ]
+        }
+      ]
+    },
+    {
+      "exercise": "8.2",
+      "questions": [
+        {
+          "question": "निम्नलिखित के मान निकालिए:",
+          "sub_questions": [
+            "sin 60° cos 30° + sin 30° cos 60° / cos 45°",
+            "2 tan² 45° + cos² 30° - sin² 60°",
+            "sec 30° + cosec 30°",
+            "sin 30° + tan 45° - cosec 60° / sec 30° + cos 60° + cot 45°",
+            "(5 cos² 60° + 4 sec² 30° - tan² 45°) / (sin² 30° + cos² 30°)"
+          ]
+        },
+        {
+          "question": "सही विकल्प चुनिए और अपने विकल्प का औचित्य दीजिए:",
+          "sub_questions": [
+            {
+              "text": "2 tan 30° / 1 + tan² 30°",
+              "options": ["A) sin 60°", "B) cos 60°", "C) tan 60°", "D) sin 30°"]
+            },
+            {
+              "text": "1 - tan² 45°",
+              "options": ["A) tan 90°", "B) 1", "C) sin 45°", "D) 0"]
+            },
+            {
+              "text": "sin 2A = 2 sin A तब सत्य होता है, जबकि A का मान है:",
+              "options": ["A) 30°", "B) 45°", "C) 60°", "D) 0°"]
+            },
+            {
+              "text": "cos 60° बराबर है:",
+              "options": ["A) 1", "B) 0", "C) 1/2", "D) sin 30°"]
+            }
+          ]
+        },
+        {
+          "question": "यदि tan (A + B) = √3 और tan (A - B) = 1/√3 और 0° < A + B < 90°, A > B तो A और B का मान ज्ञात कीजिए।"
+        },
+        {
+          "question": "बताइए कि निम्नलिखित में कौन-सा सत्य है या असत्य है। कारण सहित अपने उत्तर की पुष्टि कीजिए:",
+          "sub_questions": [
+            "sin (A + B) = sin A + sin B",
+            "cos 2A = 1 - 2 sin² A",
+            "यदि sin θ = 1/2 हो, तो cos θ का मान भी 1/2 हो सकता है।",
+            "tan A का मान A के मान पर निर्भर करता है।",
+            "A = 0° पर cot A परिभाषित नहीं है।"
+          ]
+        }
+      ]
+    },
+    {
+      "exercise": "8.3",
+      "questions": [
+        {
+          "question": "त्रिकोणमितीय अनुपातों sin A, sec A और tan A के बीच के संबंध ज्ञात कीजिए।"
+        },
+        {
+          "question": "∠A के अन्य त्रिकोणमितीय अनुपातों को sec A के रूप में व्यक्त कीजिए।"
+        },
+        {
+          "question": "सही विकल्प चुनिए और अपने उत्तर का औचित्य दीजिए:",
+          "sub_questions": [
+            {
+              "text": "9 sec² A - 9 tan² A बराबर है:",
+              "options": ["A) 1", "B) 9", "C) 8", "D) 0"]
+            },
+            {
+              "text": "(1 + tan θ + sec θ) (1 + cot θ - cosec θ) बराबर है:",
+              "options": ["A) 0", "B) 1", "C) 2", "D) -1"]
+            },
+            {
+              "text": "(sec A + tan A) (1 - sin A) बराबर है:",
+              "options": ["A) sec A", "B) sin A", "C) cosec A", "D) cos A"]
+            },
+            {
+              "text": "(1 + tan² A) / (1 + cot² A) बराबर है:",
+              "options": ["A) sec² A", "B) -1", "C) cot² A", "D) tan² A"]
+            }
+          ]
+        },
+        {
+          "question": "निम्नलिखित सर्वसमिकाएँ सिद्ध कीजिए, जहाँ वे कोण, जिनके लिए व्यंजक परिभाषित है, न्यून कोण हैं:",
+          "sub_questions": [
+            "(i) (cosec θ - cot θ)² = (1 - cos θ) / (1 + cos θ)",
+            "(ii) (cos A / (1 + sin A)) + ((1 + sin A) / cos A) = 2 sec A",
+            "(iii) tan θ / (1 - cot θ) + cot θ / (1 - tan θ) = 1 + sec θ cosec θ",
+            "(iv) (1 + sec A) / sec A = (sin² A / (1 - cos A))"
+          ],
+          "note": "व्यंजक को sin θ और cos θ के पदों में लिखिए"
+        }
+      ]
+    }
+  ]
+}

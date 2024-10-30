@@ -1,4 +1,4 @@
 streamlit
 openai
 python-dotenv
-reportlab
+markdown_pdf

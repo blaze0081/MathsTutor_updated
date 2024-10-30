@@ -2,18 +2,15 @@ import streamlit as st
 from openai import OpenAI
 import os
 import re
-from reportlab.lib.pagesizes import letter
-from reportlab.pdfgen import canvas
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import SimpleDocTemplate, Paragraph
-from reportlab.lib.pagesizes import letter
-from io import BytesIO
+from markdown_pdf import MarkdownPdf, Section
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-api_key = st.secrets["openai"]["api_key"]
-# Initialize OpenAI client at the module level
-client = OpenAI(api_key=api_key)
+load_dotenv()
+
+api_key = os.getenv("OPENAI_API_KEY")
+
+
 
 def format_math_content(content):
     """
@@ -65,47 +62,6 @@ def format_math_content(content):
     
     return '\n\n'.join(formatted_sections)
 
-def create_pdf(text):
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter)
-    styles = getSampleStyleSheet()
-    
-    # Create custom style for mathematical content
-    math_style = ParagraphStyle(
-        'MathStyle',
-        parent=styles['Normal'],
-        fontSize=12,
-        leading=16,
-        spaceAfter=12  # Add space after paragraphs
-    )
-    
-    # Create header style
-    header_style = ParagraphStyle(
-        'HeaderStyle',
-        parent=styles['Heading1'],
-        fontSize=14,
-        leading=18,
-        spaceAfter=12
-    )
-    
-    story = []
-    sections = text.split('\n\n')
-    
-    for section in sections:
-        if section.strip():
-            if section.strip().startswith(('Questions:', 'Answers:')):
-                # Handle section headers
-                story.append(Paragraph(section.split('\n')[0], header_style))
-                remaining_content = '\n'.join(section.split('\n')[1:])
-                if remaining_content.strip():
-                    story.append(Paragraph(remaining_content, math_style))
-            else:
-                # Handle questions and answers
-                story.append(Paragraph(section, math_style))
-    
-    doc.build(story)
-    buffer.seek(0)
-    return buffer
 
 def init_mathjax():
     components.html(
@@ -156,7 +112,25 @@ def process_latex_content(content):
     
     return '\n'.join(formatted_content)
 
+def create_pdf(text, filename):
+    """
+    Creates a PDF from markdown text and returns the filename
+    
+    Args:
+        text (str): Markdown text to convert
+        filename (str): Output filename
+        
+    Returns:
+        str: The filename of the created PDF
+    """
+    pdf = MarkdownPdf(toc_level=2)
+    pdf.add_section(Section(text))
+    pdf.save(filename)
+    return filename  # Return the filename instead of the PDF object
+
 def generate():
+    client = OpenAI(api_key=api_key)
+
     # Initialize MathJax
     init_mathjax()
     language = st.session_state.language
@@ -194,21 +168,17 @@ def generate():
         )
 
     if st.button("Generate Questions"):
-        with st.spinner("Generating questions..."):
+        with st.spinner("Generating questions... this may take some time"):
             system_message = """You are an experienced mathematics teacher. Generate questions similar to the given examples, following these guidelines:
-            1. Maintain consistent difficulty level
-            2. Include step-by-step solutions where appropriate
-            3. For MCQs, include 4 options with one correct answer
-            4. Use LaTeX formatting for mathematical expressions (use $ for inline math and $$ for display math)
-            5. Number each question clearly
-            6. Separate questions and answers clearly"""
+            1. Use LaTeX formatting for mathematical expressions (use $ for inline math and $$ for display math)
+            """
 
             questions = list(st.session_state.question_queue)
             prompt = f"""Based on these example questions:
 
 {chr(10).join(f'Example {i+1}: {q}' for i, q in enumerate(questions))}
 
-Generate {number} new {toughness.lower()} difficulty {question_type} in {language} with the following structure:
+Generate {number} new {toughness.lower()} difficulty {question_type} with the following structure:
 
 Questions:
 1. [First question]
@@ -222,7 +192,7 @@ Answers:
 
             try:
                 response = client.chat.completions.create(
-                    model="gpt-4",  # Fixed the model name from "gpt-4o" to "gpt-4"
+                    model="gpt-4o",
                     messages=[
                         {"role": "system", "content": system_message},
                         {"role": "user", "content": prompt}
@@ -232,34 +202,37 @@ Answers:
                 
                 raw_answer = response.choices[0].message.content
                 
-                # Process the content for better rendering
-                processed_content = format_math_content(raw_answer)
+                # if language == "Hindi":
+                # # Translate the processed text
+                #     translated_text = translate_text(raw_answer, language) 
+
+                #     raw_answer = translated_text
+
+                processed_content = process_latex_content(raw_answer)
                 
-                # Display the content using Streamlit's markdown
+                # Display content
                 st.write("### Generated Questions and Solutions")
-                # Split content into sections and display with proper spacing
                 sections = processed_content.split('\n\n')
                 for section in sections:
                     if section.strip():
                         st.markdown(section, unsafe_allow_html=True)
-                        st.markdown("&nbsp;")  # Add extra space between sections
+                        st.markdown("&nbsp;")
+                 
                 
-                # Create download buttons with properly formatted content
-                st.download_button(
-                    label="Download Questions and Solutions",
-                    data=processed_content,
-                    file_name="math_questions.txt",
-                    mime="text/plain"
-                )
-                
-                # Create and offer PDF download
-                pdf = create_pdf(processed_content)
-                st.download_button(
-                    label="Download PDF",
-                    data=pdf,
-                    file_name="questions_and_answers.pdf",
-                    mime="application/pdf"
-                )
+                # PDF generation and download
+                try:
+                    pdf_filename = create_pdf(processed_content, "questions_and_answers.pdf")
+                    with open(pdf_filename, "rb") as pdf_file:
+                        pdf_data = pdf_file.read()
+                        st.download_button(
+                            label="Download PDF",
+                            data=pdf_data,
+                            file_name="questions_and_answers.pdf",
+                            mime="application/pdf"
+                        )
+                    os.remove(pdf_filename)  # Clean up
+                except Exception as pdf_error:
+                    st.error(f"Error generating PDF: {str(pdf_error)}")
                 
             except Exception as e:
                 st.error(f"An error occurred while generating questions: {str(e)}")
