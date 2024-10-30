@@ -5,9 +5,7 @@ import re
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-load_dotenv()
-
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = st.secrets["openai"]["api_key"]
 
 # Add MathJax initialization to your Streamlit app
 def init_mathjax():
