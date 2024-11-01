@@ -4,9 +4,10 @@ import os
 import re
 from markdown_pdf import MarkdownPdf, Section
 import streamlit.components.v1 as components
-from dotenv import load_dotenv
 
 api_key = st.secrets["openai"]["api_key"]
+
+
 
 def format_math_content(content):
     """
@@ -145,23 +146,23 @@ def generate():
             ("Easy", "Medium", "Hard")
         )
         
-        number = st.number_input("Number of questions to generate", 1, 50, 5)
+        number = st.number_input("Number of questions to generate", 1, 10, 5)
 
-    with col2:
-        question_type = st.selectbox(
-            "Question Type",
-            ("Multiple Choice Questions", "Fill in the Blanks", "Short Answer Type", "True/False")
-        )
-        if language == "Hindi":
-            preset_index = 1
-        else:
-            preset_index = 0
+    # with col2:
+    #     question_type = st.selectbox(
+    #         "Question Type",
+    #         ("Multiple Choice Questions", "Fill in the Blanks", "Short Answer Type", "True/False")
+    #     )
+    #     if language == "Hindi":
+    #         preset_index = 1
+    #     else:
+    #         preset_index = 0
         
-        language = st.selectbox(
-            "Language",
-            ("English", "Hindi"),
-            index=preset_index
-        )
+    #     language = st.selectbox(
+    #         "Language",
+    #         ("English", "Hindi"),
+    #         index=preset_index
+    #     )
 
     if st.button("Generate Questions"):
         with st.spinner("Generating questions... this may take some time"):
@@ -174,7 +175,7 @@ def generate():
 
 {chr(10).join(f'Example {i+1}: {q}' for i, q in enumerate(questions))}
 
-Generate {number} new {toughness.lower()} difficulty {question_type} with the following structure:
+Generate {number} new {toughness.lower()} difficulty questions with the following structure:
 
 Questions:
 1. [First question]

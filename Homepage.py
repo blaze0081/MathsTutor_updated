@@ -14,7 +14,7 @@ if 'question_queue' not in st.session_state:
 if 'checked_questions' not in st.session_state:
     st.session_state.checked_questions = set()
 if 'language' not in st.session_state:
-    st.session_state.language = "English"
+    st.session_state.language = "Hindi"  # Changed default to Hindi
 if 'data' not in st.session_state:
     st.session_state.data = None
 
@@ -31,6 +31,13 @@ def update_question(question, is_checked):
 
 # Main page
 def main_page():
+
+    main_body_logo = "logo.jpeg"
+    sidebar_logo = "horizontal.png"
+
+    st.logo(sidebar_logo, icon_image=main_body_logo)
+    st.image("logo.jpeg", caption="Padha with AI")
+
     st.title("Exercise Questions Viewer")
     st.markdown("Select Language and Chapter from sidebar and click Submit")
 
@@ -40,8 +47,9 @@ def main_page():
     # Language selection in sidebar
     st.sidebar.header("Select Language")
     language_selection = st.sidebar.radio("", 
-        ["***English***", "***Hindi***"], 
-        index=0)
+        ["***Hindi***", "***English***"], 
+        index=0  # Set index to 0 for Hindi as default
+    )
     
     # Update session state language (strip asterisks)
     st.session_state.language = language_selection.replace("*", "")

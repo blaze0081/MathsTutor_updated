@@ -1,14 +1,13 @@
 import streamlit as st
 from openai import OpenAI
 import os
-import re
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 api_key = st.secrets["openai"]["api_key"]
 
-# Add MathJax initialization to your Streamlit app
 def init_mathjax():
+    """Initialize MathJax for rendering LaTeX equations"""
     components.html(
         """
         <script>
@@ -22,89 +21,66 @@ def init_mathjax():
                 }
             };
         </script>
-        <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-        <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js" async></script>
         """,
-        height=0,
+        height=0
     )
 
-def process_latex_content(content):
-    # Function to process and clean LaTeX content
-    processed_content = content
-    
-    # Replace common LaTeX patterns for better rendering
-    replacements = {
-        r'\(': '$',
-        r'\)': '$',
-        r'\[': '$$',
-        r'\]': '$$',
-    }
-    
-    for old, new in replacements.items():
-        processed_content = processed_content.replace(old, new)
-    
-    # Split content into questions and answers sections
-    sections = re.split(r'(Questions:|Answers:)', processed_content)
-    formatted_content = []
-    
-    for section in sections:
-        if section.strip() in ['Questions:', 'Answers:']:
-            formatted_content.append(f"### {section.strip()}\n")
-        else:
-            # Process numbered items
-            section = re.sub(r'(\d+\.) ', r'\n\1 ', section)
-            formatted_content.append(section)
-    
-    return '\n'.join(formatted_content)
-
-
 def solve():
-    # Initialize MathJax
+    # Initialize MathJax first
     init_mathjax()
     
     client = OpenAI(api_key=api_key)
     
+    if not st.session_state.question_queue:
+        st.error("No questions selected to solve. Please select questions from the main page.")
+        return
+
+    # Display selected questions first
+    st.write("### Selected Questions")
+    for i, question in enumerate(st.session_state.question_queue, 1):
+        st.markdown(f"**Question {i}:** {question}")
+
+    st.write("### Solutions")
+    
     system_message = """You are an experienced mathematics teacher. Solve the questions given, following these guidelines:
-    1. Include step-by-step solutions where appropriate
+    1. Include step-by-step solutions
     2. Use LaTeX formatting for mathematical expressions (use $ for inline math and $$ for display math)
-    3. Number each question clearly
-    4. Separate questions and answers clearly"""
-    questions = list(st.session_state.question_queue)
-    language = st.session_state.language
-    prompt = f"Please solve the following mathematics questions in {language} step by step:\n\n "
-    for i, question in enumerate(questions, 1):
+    3. Show complete solution with final answers written as Final Answer: <answer>
+    4. Ensure that the last step, with the final value of the variable, is displayed at the end of the solution. The value should be in numbers, do not write an unsolved equation as the final value
+    5. If the question is a word problem, explain the solution in a way that is easy to understand
+    6. Recheck the solution for any mistakes
+    7. Start each question with '**Question N:**' where N is the question number, and reproduce the question in bold letters"""
+    
+    prompt = f"Please solve the following mathematics questions in {st.session_state.language} step by step:\n\n"
+    for i, question in enumerate(st.session_state.question_queue, 1):
         prompt += f"Question {i}: {question}\n"
 
-
-    response = client.chat.completions.create(
-        model="gpt-4o",
-        messages=[
-            {"role": "system", "content": system_message},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7
-    )
     
-    raw_answer = response.choices[0].message.content
-
-    # if language == "Hindi":
-    #     # Translate the processed text
-    #     translated_text = translate_text(raw_answer) 
-
-    #     raw_answer = translated_text
-    
-    # Process the content for better rendering
-    processed_content = process_latex_content(raw_answer)
+    with st.spinner("Generating solutions... Please wait"):
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7
+        )
         
-    
-    # Display the content using Streamlit's markdown
-    st.write("### Generated Questions and Solutions")
-    for line in processed_content.split('\n'):
-        if line.strip():
-            st.markdown(line, unsafe_allow_html=True)
+        raw_answer = response.choices[0].message.content
+        
+        # Display content using Streamlit's markdown
+        st.markdown(raw_answer, unsafe_allow_html=True)
+            
 
+   
     if st.button("Clear Selected Questions"):
         st.session_state.question_queue.clear()
         st.session_state.checked_questions.clear()
         st.success("Selected questions cleared!")
         st.rerun()
+
+
+
+
+
