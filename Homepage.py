@@ -32,11 +32,11 @@ def update_question(question, is_checked):
 # Main page
 def main_page():
 
-    main_body_logo = "logo.jpeg"
+    main_body_logo = "sfavicon.webp"
     sidebar_logo = "horizontal.png"
 
     st.logo(sidebar_logo, icon_image=main_body_logo)
-    st.image("logo.jpeg", caption="Padha with AI")
+    st.image("logo.jpeg", caption="Padhai with AI")
 
     st.title("Exercise Questions Viewer")
     st.markdown("Select Language and Chapter from sidebar and click Submit")
@@ -108,12 +108,18 @@ def main_page():
                     key=f"checkbox_{i}"
                 )
                 update_question(question_text, is_checked)
-
         # Display the selected questions queue
         st.sidebar.subheader("Selected Questions Queue")
         if st.session_state.question_queue:
             for q in st.session_state.question_queue:
                 st.sidebar.write(q)
+    
+        # Add Clear Selected Questions button
+        if st.sidebar.button("Clear Selected Questions", key="clear_selected"):
+            st.session_state.question_queue.clear()
+            st.session_state.checked_questions.clear()
+            st.sidebar.success("Selected questions cleared!")
+            st.rerun()
         else:
             st.sidebar.write("No questions selected.")
 
