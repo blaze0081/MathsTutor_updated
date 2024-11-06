@@ -8,7 +8,7 @@ from typing import List
 from latexConvertor import convert_latex_document
 
 # Get API key from Streamlit secrets
-api_key = st.secrets["openai"]["api_key"]
+# api_key = st.secrets["openai"]["api_key"]
 
 from dotenv import load_dotenv
 load_dotenv()
