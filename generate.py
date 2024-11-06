@@ -10,6 +10,10 @@ from latexConvertor import convert_latex_document
 # Get API key from Streamlit secrets
 api_key = st.secrets["openai"]["api_key"]
 
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
 def format_math_content(content: str) -> str:
     """
     Formats mathematical content consistently for both display and download.
