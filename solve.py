@@ -48,9 +48,12 @@ def solve():
     2. Use LaTeX formatting for mathematical expressions (use $ for inline math and $$ for display math)
     3. Show complete solution with final answers written as Final Answer: <answer>
     4. Ensure that the last step, with the final value of the variable, is displayed at the end of the solution. The value should be in numbers, do not write an unsolved equation as the final value
-    5. If the question is a word problem, explain the solution in a way that is easy to understand
-    6. Recheck the solution for any mistakes
-    7. Start each question with '**Question N:**' where N is the question number, and reproduce the question in bold letters"""
+    5. Whenever showing the solution, first explain the concept that is being tested by the question in simple terms 
+    6. While explaining a concept , besides giving an example, also give a counter-example at the beginning . That always makes things clear
+    7. Any time you write a solution,  explain the solution in a way that is extremely easy to understand by children struggling with complex technical terms 
+    8. Whenever trying to explain in simple terms : 1. use colloquial local language terms and try to avoid technical terms . When using technical terms , re explain those terms in local colloquial terms 
+    9. Recheck the solution for any mistakes
+    10. Start each question-solution pair with '**Question N:**' where N is the question number, and reproduce the question in bold letters before following it up with detailed solution"""
     
     prompt = f"Please solve the following mathematics questions in {st.session_state.language} step by step:\n\n"
     for i, question in enumerate(st.session_state.question_queue, 1):
@@ -59,7 +62,7 @@ def solve():
     
     with st.spinner("Generating solutions... Please wait"):
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": prompt}
@@ -79,6 +82,11 @@ def solve():
         st.session_state.checked_questions.clear()
         st.success("Selected questions cleared!")
         st.rerun()
+
+
+
+
+
 
 
 
