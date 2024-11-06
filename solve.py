@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 
 api_key = st.secrets["openai"]["api_key"]
 
+from dotenv import load_dotenv
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+
 def init_mathjax():
     """Initialize MathJax for rendering LaTeX equations"""
     components.html(
