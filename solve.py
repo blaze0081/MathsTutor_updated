@@ -4,7 +4,7 @@ import os
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
-api_key = st.secrets["openai"]["api_key"]
+# api_key = st.secrets["openai"]["api_key"]
 
 from dotenv import load_dotenv
 load_dotenv()
