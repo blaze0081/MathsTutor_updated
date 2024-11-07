@@ -60,3 +60,39 @@ def convert_latex_document(content):
     processed_text = convert_superscript(processed_text)
     
     return processed_text
+
+def process_latex_content(content: str) -> str:
+    """
+    Process and clean LaTeX content for better rendering.
+    
+    Args:
+        content: Raw content containing LaTeX expressions
+        
+    Returns:
+        Processed content with proper LaTeX formatting
+    """
+    # Replace common LaTeX patterns
+    replacements = {
+        r'\(': '$',
+        r'\)': '$',
+        r'\[': '$$',
+        r'\]': '$$',
+    }
+    
+    processed_content = content
+    for old, new in replacements.items():
+        processed_content = processed_content.replace(old, new)
+    
+    # Split content into sections
+    sections = re.split(r'(Questions:|Answers:|प्रश्न:|उत्तर:)', processed_content)
+    formatted_content = []
+    
+    for section in sections:
+        if section.strip() in ['Questions:', 'Answers:', 'प्रश्न:', 'उत्तर:']:
+            formatted_content.append(f"### {section.strip()}\n")
+        else:
+            # Process numbered items
+            section = re.sub(r'(\d+\.) ', r'\n\1 ', section)
+            formatted_content.append(section)
+    
+    return '\n'.join(formatted_content)
