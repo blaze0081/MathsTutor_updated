@@ -66,7 +66,7 @@ def solve():
     
     with st.spinner("Generating solutions... Please wait"):
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": prompt}
