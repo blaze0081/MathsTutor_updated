@@ -6,7 +6,7 @@ from markdown_pdf import MarkdownPdf, Section
 import streamlit.components.v1 as components
 from typing import List
 from latexConvertor import convert_latex_document
-import tempfile
+from pathlib import Path
 
 # Get API key from Streamlit secrets
 # api_key = st.secrets["openai"]["api_key"]
