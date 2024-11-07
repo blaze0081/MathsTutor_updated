@@ -6,6 +6,7 @@ from markdown_pdf import MarkdownPdf, Section
 import streamlit.components.v1 as components
 from typing import List
 from latexConvertor import convert_latex_document
+import tempfile
 
 # Get API key from Streamlit secrets
 # api_key = st.secrets["openai"]["api_key"]
@@ -13,6 +14,15 @@ from latexConvertor import convert_latex_document
 from dotenv import load_dotenv
 load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
+
+# Get base directory and temp settings
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMP_ROOT = os.environ.get('TEMP_ROOT', BASE_DIR / 'temp')
+TEMP_URL = os.environ.get('TEMP_URL', '/temp/')
+
+# Ensure temp directory exists
+os.makedirs(TEMP_ROOT, exist_ok=True)
+
 
 def format_math_content(content: str) -> str:
     """
@@ -126,22 +136,39 @@ def process_latex_content(content: str) -> str:
     
     return '\n'.join(formatted_content)
 
-def create_pdf(text: str, filename: str) -> str:
+
+def create_pdf(text: str, filename: str) -> bytes:
     """
-    Creates a PDF from markdown text and returns the filename.
+    Creates a PDF from markdown text and returns the PDF content.
+    Uses the configured TEMP_ROOT directory.
     
     Args:
         text: Markdown text to convert
         filename: Output filename
         
     Returns:
-        str: The filename of the created PDF
+        bytes: The PDF content
     """
     try:
+        # Create the full path for the PDF in the temp directory
+        temp_pdf_path = os.path.join(TEMP_ROOT, filename)
+        
+        # Create the PDF
         pdf = MarkdownPdf(toc_level=2)
         pdf.add_section(Section(text))
-        pdf.save(filename)
-        return filename
+        pdf.save(temp_pdf_path)
+        
+        # Read the PDF content
+        with open(temp_pdf_path, 'rb') as pdf_file:
+            pdf_content = pdf_file.read()
+            
+        # Clean up the temporary file
+        try:
+            os.remove(temp_pdf_path)
+        except Exception as cleanup_error:
+            st.warning(f"Warning: Could not clean up temporary file: {cleanup_error}")
+        
+        return pdf_content
     except Exception as e:
         raise Exception(f"Error creating PDF: {str(e)}")
 
@@ -424,20 +451,17 @@ Answers:
                     st.markdown(section, unsafe_allow_html=True)
                     st.markdown("&nbsp;")
             
-            # PDF generation and download
+             # PDF generation and download
             formatted_text = convert_latex_document(processed_content)
             try:
-                pdf_filename = create_pdf(formatted_text, "questions_and_answers.pdf")
-                with open(pdf_filename, "rb") as pdf_file:
-                    pdf_data = pdf_file.read()
-                    download_label = "डाउनलोड PDF" if language_selection == "Hindi" else "Download PDF"
-                    st.download_button(
-                        label=download_label,
-                        data=pdf_data,
-                        file_name="questions_and_answers.pdf",
-                        mime="application/pdf"
-                    )
-                os.remove(pdf_filename)  # Clean up
+                pdf_content = create_pdf(formatted_text, f"questions_and_answers_{int(time.time())}.pdf")
+                download_label = "डाउनलोड PDF" if language_selection == "Hindi" else "Download PDF"
+                st.download_button(
+                    label=download_label,
+                    data=pdf_content,
+                    file_name="questions_and_answers.pdf",
+                    mime="application/pdf"
+                )
             except Exception as pdf_error:
                 error_msg = "PDF बनाने में त्रुटि:" if language == "Hindi" else "Error generating PDF:"
                 st.error(f"{error_msg} {str(pdf_error)}")
