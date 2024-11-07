@@ -7,6 +7,7 @@ import streamlit.components.v1 as components
 from typing import List
 from latexConvertor import convert_latex_document
 from pathlib import Path
+import time
 
 # Get API key from Streamlit secrets
 # api_key = st.secrets["openai"]["api_key"]
