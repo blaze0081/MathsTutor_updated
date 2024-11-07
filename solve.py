@@ -3,6 +3,10 @@ from openai import OpenAI
 import os
 import streamlit.components.v1 as components
 from dotenv import load_dotenv
+from latexConvertor import convert_latex_document, process_latex_content
+import time
+from pdf_generation import create_pdf
+
 
 # api_key = st.secrets["openai"]["api_key"]
 
@@ -35,6 +39,8 @@ def solve():
     init_mathjax()
     
     client = OpenAI(api_key=api_key)
+    language = st.session_state.language
+
     
     if not st.session_state.question_queue:
         st.error("No questions selected to solve. Please select questions from the main page.")
@@ -78,6 +84,23 @@ def solve():
         
         # Display content using Streamlit's markdown
         st.markdown(raw_answer, unsafe_allow_html=True)
+
+    processed_content = process_latex_content(raw_answer)
+
+    
+    formatted_text = convert_latex_document(processed_content)
+    try:
+        pdf_content = create_pdf(formatted_text, f"questions_and_answers_{int(time.time())}.pdf")
+        download_label = "डाउनलोड PDF" if language == "Hindi" else "Download PDF"
+        st.download_button(
+            label=download_label,
+            data=pdf_content,
+            file_name="questions_and_answers.pdf",
+            mime="application/pdf"
+        )
+    except Exception as pdf_error:
+        error_msg = "PDF बनाने में त्रुटि:" if language == "Hindi" else "Error generating PDF:"
+        st.error(f"{error_msg} {str(pdf_error)}")
             
 
    
