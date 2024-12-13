@@ -5,7 +5,7 @@
       "exercise": "8.1",
       "questions": [
         {
-          "question": "1. ABC में, जिसका कोण B समकोण है, AB = 24 cm और BC = 7 cm है। निम्नलिखित का मान ज्ञात कीजिए:",
+          "question": "1. ∆ABC में, जिसका कोण B समकोण है, AB = 24 cm और BC = 7 cm है। निम्नलिखित का मान ज्ञात कीजिए:",
           "sub_questions": [
             "I. sin A, cos A",
             "II. sin C, cos C"
@@ -107,8 +107,9 @@
           "question": "3. सही विकल्प चुनिए और अपने विकल्प की पुष्टि कीजिए:",
           "sub_questions": [
             "I. 9sec²A - 9tan²A = (A) 1 (B) 9 (C) 8 (D) 0",
-            "II. (1 + tanθ + secθ)(1 + cotθ - cosecθ) = (A) sec A (B) sin A (C) cosec A (D) cos A",
-            "III. (1 + tan²A) / (1 + cot²A) = (A) sec²A (B) -1 (C) cot²A (D) tan²A"
+            "II. (1 + tanθ + secθ)(1 + cotθ - cosecθ) = (A) 0 (B) 1 (C) 2 (D) -1",
+            "III. ( sec A + tan A ) ( 1 - sin A ) = (A) sec A (B) sin A (C) cosec A (D) cos A",
+            "IV. (1 + tan²A) / (1 + cot²A) = (A) sec²A (B) -1 (C) cot²A (D) tan²A"
           ]
         },
         {
