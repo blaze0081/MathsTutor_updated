@@ -1,5 +1,6 @@
 {
   "chapter": "प्रायिकता",
+  "exercises": [
   "exercise": "14.1",
   "questions": [
     {
@@ -80,4 +81,5 @@
       ]
     }
   ]
+]
 }
